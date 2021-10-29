@@ -33,6 +33,21 @@ delta_v = 0
 y_pos = 90
 gedrueckt = False
 
+# Fuzzy
+import fuzzy
+m1 = fuzzy.M1(800, 1400) # Geringe Höhe
+m2 = fuzzy.M2(900, 2000) # Mittlere Höhe
+m3 = fuzzy.M3(1400, 2000) # Große Höhe
+
+# Mengen hier quasi verdreht, wird unten 
+# mit "100 - Ausgabe" verrechnet
+a1 = fuzzy.M1(12, 65) # Viel Bremskraft
+a2 = fuzzy.M2(30, 90) # Mittlere Bremskraft
+a3 = fuzzy.M3(60, 70) # Wenig Bremskraft
+
+agg = fuzzy.Aggregator([m1, m2, m3], [a1, a2, a3], 100)
+defuzzy = fuzzy.Defuzzy()
+
 # der Gashebel
 class GashebelKlasse(pygame.sprite.Sprite):
     def __init__(self, ort = [0,0]):
@@ -154,17 +169,12 @@ while True:
     else:  # Spiel vorbei, gib den Endstand aus
         gib_endstand_aus()
                   
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT: 
-            sys.exit()
-        elif event.type == pygame.MOUSEBUTTONDOWN:          
-            gedrueckt = True                                
-        elif event.type == pygame.MOUSEBUTTONUP:            
-            gedrueckt = False                               
-        elif event.type == pygame.MOUSEMOTION:
-            if gedrueckt:
-                meinGashebel.rect.centery = event.pos[1]
-                if meinGashebel.rect.centery < 300:
-                    meinGashebel.rect.centery = 300
-                if meinGashebel.rect.centery > 500:
-                    meinGashebel.rect.centery = 500
+
+    (x, y), _ = agg.aggregate(hoehe)
+    gas_percent = 1 - defuzzy.centroid(x, y) / 100
+    print(f"Gas: {gas_percent*100:.2f}% -> {500 - 200 * gas_percent:.2f}")
+    meinGashebel.rect.centery = 500 - 200 * gas_percent
+    if meinGashebel.rect.centery < 300:
+        meinGashebel.rect.centery = 300
+    if meinGashebel.rect.centery > 500:
+        meinGashebel.rect.centery = 500

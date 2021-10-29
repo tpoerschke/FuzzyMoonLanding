@@ -1,18 +1,19 @@
-import fuzzy
-
+import time
 import matplotlib.pyplot as plt
 
-m1 = fuzzy.M1(300, 1000)
-m2 = fuzzy.M2(500, 1500)
-m3 = fuzzy.M3(1000, 1700)
+import fuzzy
 
-a1 = fuzzy.M1(20, 50)
-a2 = fuzzy.M2(25, 75)
-a3 = fuzzy.M3(50, 80)
+m1 = fuzzy.M1(800, 1400) # Geringe Höhe
+m2 = fuzzy.M2(900, 2000) # Mittlere Höhe
+m3 = fuzzy.M3(1400, 2000) # Große Höhe
 
-agg = fuzzy.Aggregator([m1, m2, m3], [a1, a2, a3], 100)
-x_val = 1200
-(xx, yy), (inf1, inf2, inf3) = agg.aggregate(x_val)
+a1 = fuzzy.M1(12, 65) # Viel Bremskraft
+a2 = fuzzy.M2(30, 90) # Mittlere Bremskraft
+a3 = fuzzy.M3(60, 70) # Wenig Bremskraft
+
+agg = fuzzy.Aggregator([m1, m2, m3], [a1, a2, a3], output_upper_bound=100)
+# x_val = 1200 # 200, 800, 1200, 1800
+# (xx, yy), (inf1, inf2, inf3) = agg.aggregate(x_val)
 
 
 # Eingabe- und Ausgabemengen plotten
@@ -23,6 +24,7 @@ ax1, ay1 = [], []
 ax2, ay2 = [], []
 ax3, ay3 = [], []
 
+plt.ion()
 fig, (axis1, axis2) = plt.subplots(1, 2)
 
 for i in range(0, 2000+1):
@@ -43,32 +45,38 @@ for i in range(0, 100):
     ax3.append(i)
     ay3.append(a3(i))
 
+for x_val in range(0, 2000, 10):
+    #x_val = 1200 # 200, 800, 1200, 1800
+    (xx, yy), (inf1, inf2, inf3) = agg.aggregate(x_val)
 
-axis1.set_title("Eingabemengen")
-axis1.vlines(x_val, 0, max(inf1, inf2, inf3), color="gray", linestyle="dotted")
-axis1.plot(mx1, my1, color="red")
-axis1.hlines(inf1, x_val, 2000, color="red", linestyle="dotted")
-axis1.plot(mx2, my2, color="blue")
-axis1.hlines(inf2, x_val, 2000, color="blue", linestyle="dotted")
-axis1.plot(mx3, my3, color="green")
-axis1.hlines(inf3, x_val, 2000, color="green", linestyle="dotted")
+    axis1.clear()
+    axis1.set_title("Eingabemengen")
+    axis1.vlines(x_val, 0, max(inf1, inf2, inf3), color="gray", linestyle="dotted")
+    axis1.plot(mx1, my1, color="red")
+    axis1.hlines(inf1, x_val, 2000, color="red", linestyle="dotted")
+    axis1.plot(mx2, my2, color="blue")
+    axis1.hlines(inf2, x_val, 2000, color="blue", linestyle="dotted")
+    axis1.plot(mx3, my3, color="green")
+    axis1.hlines(inf3, x_val, 2000, color="green", linestyle="dotted")
 
-axis2.set_title("Ausgabemengen")
-axis2.plot(ax1, ay1, color="red")
-axis2.hlines(inf1, 0, 100, color="red", linestyle="dotted")
-axis2.plot(ax2, ay2, color="blue")
-axis2.hlines(inf2, 0, 100, color="blue", linestyle="dotted")
-axis2.plot(ax3, ay3, color="green")
-axis2.hlines(inf3, 0, 100, color="green", linestyle="dotted")
+    axis2.clear()
+    axis2.set_title("Ausgabemengen")
+    axis2.plot(ax1, ay1, color="red")
+    axis2.hlines(inf1, 0, 100, color="red", linestyle="dotted")
+    axis2.plot(ax2, ay2, color="blue")
+    axis2.hlines(inf2, 0, 100, color="blue", linestyle="dotted")
+    axis2.plot(ax3, ay3, color="green")
+    axis2.hlines(inf3, 0, 100, color="green", linestyle="dotted")
 
-# Aggregation darstellen
-axis2.plot(xx, yy, color="black", linewidth="2")
-axis2.axes.get_yaxis().set_ticks([])
+    axis2.axes.get_yaxis().set_ticks([])
+    plt.subplots_adjust(wspace=0.05)
 
-# Schwerpunkt bestimmen
-centroid = fuzzy.Defuzzy().centroid(xx, yy)
-axis2.vlines(centroid, 0, 1, color="gray", linestyle="dashed")
+    # Aggregation darstellen
+    axis2.plot(xx, yy, color="black", linewidth=3)
+    # Schwerpunkt bestimmen
+    centroid = fuzzy.Defuzzy().centroid(xx, yy)
+    axis2.vlines(centroid, 0, 1, color="gray", linestyle="dashed")
+    fig.canvas.draw()
+    plt.pause(0.02)
 
-plt.subplots_adjust(wspace=0.05)
-plt.show()
-
+time.sleep(30)
