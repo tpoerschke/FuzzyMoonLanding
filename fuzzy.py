@@ -1,4 +1,4 @@
-
+from typing import List, Union
 
 class M1:
     def __init__(self, x1, x2):
@@ -42,4 +42,21 @@ class M3:
 
 
 class Aggregator:
-    pass
+    def __init__(self, input_sets: List[Union[M1, M2, M3]], output_sets: List[Union[M1, M2, M3]], output_upper_bound: int): 
+        self.input_sets = input_sets
+        self.output_sets = output_sets
+        self.output_upper_bound = output_upper_bound
+    
+    def aggregate(self, input_val):
+        infs = [m(input_val) for m in self.input_sets]
+        x, y = [], []
+        for i in range(0, self.output_upper_bound + 1):
+            x.append(i)
+            y.append(max([min(inf, out_set(i)) for inf, out_set in zip(infs, self.output_sets)]))
+
+        return (x, y), infs
+
+
+class Defuzzy():
+    def centroid(self, x: List[Union[int, float]], y: List[Union[int, float]]):
+        return sum(y * x for x, y in zip(x, y)) / sum(y)

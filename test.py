@@ -10,6 +10,11 @@ a1 = fuzzy.M1(20, 50)
 a2 = fuzzy.M2(25, 75)
 a3 = fuzzy.M3(50, 80)
 
+agg = fuzzy.Aggregator([m1, m2, m3], [a1, a2, a3], 100)
+x_val = 1200
+(xx, yy), (inf1, inf2, inf3) = agg.aggregate(x_val)
+
+
 # Eingabe- und Ausgabemengen plotten
 mx1, my1 = [], []
 mx2, my2 = [], []
@@ -38,38 +43,32 @@ for i in range(0, 100):
     ax3.append(i)
     ay3.append(a3(i))
 
-x_val = 1200
-infx1 = m1(x_val)
-infx2 = m2(x_val)
-infx3 = m3(x_val)
 
 axis1.set_title("Eingabemengen")
+axis1.vlines(x_val, 0, max(inf1, inf2, inf3), color="gray", linestyle="dotted")
 axis1.plot(mx1, my1, color="red")
-axis1.hlines(infx1, x_val, 2000, color="red", linestyle="dotted")
+axis1.hlines(inf1, x_val, 2000, color="red", linestyle="dotted")
 axis1.plot(mx2, my2, color="blue")
-axis1.hlines(infx2, x_val, 2000, color="blue", linestyle="dotted")
+axis1.hlines(inf2, x_val, 2000, color="blue", linestyle="dotted")
 axis1.plot(mx3, my3, color="green")
-axis1.hlines(infx3, x_val, 2000, color="green", linestyle="dotted")
+axis1.hlines(inf3, x_val, 2000, color="green", linestyle="dotted")
 
 axis2.set_title("Ausgabemengen")
 axis2.plot(ax1, ay1, color="red")
-axis2.hlines(infx1, 0, 100, color="red", linestyle="dotted")
+axis2.hlines(inf1, 0, 100, color="red", linestyle="dotted")
 axis2.plot(ax2, ay2, color="blue")
-axis2.hlines(infx2, 0, 100, color="blue", linestyle="dotted")
+axis2.hlines(inf2, 0, 100, color="blue", linestyle="dotted")
 axis2.plot(ax3, ay3, color="green")
-axis2.hlines(infx3, 0, 100, color="green", linestyle="dotted")
+axis2.hlines(inf3, 0, 100, color="green", linestyle="dotted")
 
-xx = []
-yy = []
+# Aggregation darstellen
+axis2.plot(xx, yy, color="black", linewidth="2")
+axis2.axes.get_yaxis().set_ticks([])
 
-for i in range(0, 100):
-    a1_ = min(infx1, a1(i))
-    a2_ = min(infx2, a2(i))
-    a3_ = min(infx3, a3(i))
-    xx.append(i)
-    yy.append(max(a1_, a2_, a3_))
+# Schwerpunkt bestimmen
+centroid = fuzzy.Defuzzy().centroid(xx, yy)
+axis2.vlines(centroid, 0, 1, color="gray", linestyle="dashed")
 
-axis2.plot(xx, yy, color="gray")
-
+plt.subplots_adjust(wspace=0.05)
 plt.show()
 
