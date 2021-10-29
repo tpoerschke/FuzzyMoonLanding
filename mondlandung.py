@@ -1,4 +1,4 @@
-# -*- coding: iso-8859-1 -*-
+# -*- coding: utf-8 -*-
 # Listing_24-1.py
 # Copyright Warren Sande, 2009
 # Released under MIT license   http://www.opensource.org/licenses/mit-license.php
@@ -116,8 +116,8 @@ def gib_endstand_aus():
         final3 = "Gute Landung!"
         final4 = "Die NASA braucht noch Astronauten!"
     elif geschwindigkeit > -15:
-        final3 = "Aua!  Etwas rau, aber du hast �berlebt."
-        final4 = "N�chstes Mal machst du es besser."
+        final3 = "Aua!  Etwas rau, aber du hast überlebt."
+        final4 = "Nächstes Mal machst du es besser."
     else:
         final3 = "Eijei! Das 30-Milliarden-Euro-Schiff ist kaputt!"
         final4 = "Wie kommst du jetzt nach Hause?"
