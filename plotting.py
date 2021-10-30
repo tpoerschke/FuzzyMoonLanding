@@ -3,6 +3,10 @@ import matplotlib.pyplot as plt
 
 import fuzzy
 
+# Globals
+fig, (axis1, axis2) = plt.subplots(1, 2)
+plt.subplots_adjust(wspace=0.01)
+
 def init_fuzzy_system():
     m1 = fuzzy.M1(800, 1400) # Geringe Höhe
     m2 = fuzzy.M2(900, 2000) # Mittlere Höhe
@@ -40,7 +44,7 @@ def init_set_values(input_sets, output_sets):
     return (input_sets_x, input_sets_y), (output_sets_x, output_sets_y)    
 
 
-def plot_all(axis1, axis2, input_sets_x, input_sets_y, output_sets_x, output_sets_y, agg_x, agg_y, infs, x_val, centroid):
+def plot_all(input_sets_x, input_sets_y, output_sets_x, output_sets_y, agg_x, agg_y, infs, x_val, centroid):
     colors = ["red", "blue", "green"]
     # Eingabemengen darstellen
     axis1.clear()
@@ -67,7 +71,7 @@ def plot_all(axis1, axis2, input_sets_x, input_sets_y, output_sets_x, output_set
     axis2.text(centroid, -0.03, f"{centroid:.1f}")
 
 
-def show_animation(fig, axis1, axis2):
+def show_animation():
     plt.ion()
     
     (input_sets, output_sets), agg = init_fuzzy_system()
@@ -76,7 +80,7 @@ def show_animation(fig, axis1, axis2):
         (agg_x, agg_y), infs = agg.aggregate(x_val)
         centroid = fuzzy.Defuzzy().centroid(agg_x, agg_y)
 
-        plot_all(axis1, axis2, input_sets_x, input_sets_y, output_sets_x, output_sets_y, agg_x, agg_y, infs, x_val, centroid)
+        plot_all(input_sets_x, input_sets_y, output_sets_x, output_sets_y, agg_x, agg_y, infs, x_val, centroid)
         
         fig.canvas.draw()
         plt.pause(0.1)
@@ -87,14 +91,31 @@ def show_animation(fig, axis1, axis2):
 
 # Für eine Value (Höhe) plotten.
 # Interessant: 200, 800, 1200, 1800
-def show_single_value(axis1, axis2, x_val):
+def show_single_value(x_val):
     (input_sets, output_sets), agg = init_fuzzy_system()
     (agg_x, agg_y), infs = agg.aggregate(x_val)
     centroid = fuzzy.Defuzzy().centroid(agg_x, agg_y)
 
     (input_sets_x, input_sets_y), (output_sets_x, output_sets_y) = init_set_values(input_sets, output_sets)
-    plot_all(axis1, axis2, input_sets_x, input_sets_y, output_sets_x, output_sets_y, agg_x, agg_y, infs, x_val, centroid)
+    plot_all(input_sets_x, input_sets_y, output_sets_x, output_sets_y, agg_x, agg_y, infs, x_val, centroid)
     plt.show()
+
+
+# Wird verwendet, um die Mengen während
+# des Spiels zu plotten... leider ineffizient
+class Plotting:
+    def __init__(self, input_sets, output_sets, agg, defuzzy):
+        (self.input_sets_x, self.input_sets_y), (self.output_sets_x, self.output_sets_y) = init_set_values(input_sets, output_sets)
+        self.agg = agg
+        self.defuzzy = defuzzy
+        plt.ion()
+
+    def update(self, x_val):
+        (agg_x, agg_y), infs = self.agg.aggregate(x_val)
+        centroid = self.defuzzy.centroid(agg_x, agg_y)
+        plot_all(self.input_sets_x, self.input_sets_y, self.output_sets_x, self.output_sets_y, agg_x, agg_y, infs, x_val, centroid)
+        fig.canvas.draw_idle()
+        plt.pause(0.01)
 
 
 if __name__ == "__main__":
@@ -102,10 +123,7 @@ if __name__ == "__main__":
     parser.add_argument('--value', type=int, required=False)
     args = parser.parse_args()
 
-    fig, (axis1, axis2) = plt.subplots(1, 2)
-    plt.subplots_adjust(wspace=0.01)
-
     if args.value: 
-        show_single_value(axis1, axis2, args.value)
+        show_single_value(args.value)
     else:
-        show_animation(fig, axis1, axis2)
+        show_animation()
