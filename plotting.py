@@ -1,15 +1,14 @@
 import argparse
 import matplotlib.pyplot as plt
 
-import fuzzy
-from library import *
+import fuzzy, library
 
 # Globals
 fig, (axis1, axis2) = plt.subplots(1, 2)
 plt.subplots_adjust(wspace=0.01)
 
 def _init_fuzzy_system(sets_type):
-    input_sets, output_sets = load_sets(sets_type)
+    input_sets, output_sets = library.load_sets(sets_type)
     agg = fuzzy.Aggregator(input_sets, output_sets, output_upper_bound=100)
     return (input_sets, output_sets), agg
 
@@ -113,7 +112,7 @@ class Plotting:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--value', type=int, required=False)
-    parser.add_argument('--type', type=str, required=False, default=SETS3, choices=[SETS3, SETS5_STANDARD, SETS5_SMOOTH])
+    parser.add_argument('--type', type=str, required=False, default=library.SETS3, choices=library.ALL_VARIANTS)
     args = parser.parse_args()
 
     if args.value: 

@@ -3,8 +3,10 @@ import fuzzy
 SETS3 = "3 sets"
 SETS5_STANDARD = "5 sets"
 SETS5_SMOOTH = "5 sets smooth"
+ALL_VARIANTS = (SETS3, SETS5_STANDARD, SETS5_SMOOTH)
 
-def _sets3():
+# Standard (3 Sets)
+def _sets31():
     m1 = fuzzy.M1(800, 1400) # Geringe Höhe
     m2 = fuzzy.M2(900, 2000) # Mittlere Höhe
     m3 = fuzzy.M3(1400, 2000) # Große Höhe
@@ -17,6 +19,7 @@ def _sets3():
     output_sets = (a1, a2, a3)
     return input_sets, output_sets
 
+# Standard (5 Sets)
 def _sets51():
     m1 = fuzzy.M1(100, 900)   # Sehr geringe Höhe
     m2 = fuzzy.M2(400, 1200)  # Geringe Höhe
@@ -32,6 +35,7 @@ def _sets51():
     output_sets = (a1, a2, a3, a4, a5)
     return input_sets, output_sets
 
+# Bremskraft wird am Ende verringert (5 Sets)
 def _sets52():
     m1 = fuzzy.M1(50, 500)    # Sehr geringe Höhe
     m2 = fuzzy.M2(400, 1200)  # Geringe Höhe
@@ -50,7 +54,7 @@ def _sets52():
 
 def load_sets(sets_type):
     return {
-        SETS3: _sets3(),
+        SETS3: _sets31(),
         SETS5_STANDARD: _sets51(),
         SETS5_SMOOTH: _sets52()
     }.get(sets_type, SETS3)
