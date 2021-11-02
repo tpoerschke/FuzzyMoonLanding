@@ -110,9 +110,9 @@ class Plotting:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--value', type=int, required=False)
-    parser.add_argument('--type', type=str, required=False, default=library.SETS3, choices=library.ALL_VARIANTS)
+    parser = argparse.ArgumentParser(description="Visualisiert die Fuzzy-Mengen, deren Aggregation und Ausgabe während der Landung.")
+    parser.add_argument('--value', type=int, required=False, help="Plottet einen einzigen X-Wert (hier Höhe) und spielt keine Animation ab.")
+    parser.add_argument('--variant', type=str, required=False, default=library.SETS3, choices=library.ALL_VARIANTS, help="Verwendet die gewählte Konfiguration an Fuzzy-Mengen.")
     args = parser.parse_args()
 
     if args.value: 

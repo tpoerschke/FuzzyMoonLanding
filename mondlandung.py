@@ -5,8 +5,8 @@ from landing_game import game_tick, game_state, set_lever, uhr
 from plotting import Plotting
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--type', type=str, required=False, default=library.SETS3, choices=library.ALL_VARIANTS)
-parser.add_argument('--live-plot', action='store_const', const=True, required=False)
+parser.add_argument('--variant', type=str, required=False, default=library.SETS3, choices=library.ALL_VARIANTS, help="Verwendet die gewählte Konfiguration an Fuzzy-Mengen.")
+parser.add_argument('--live-plot', action='store_const', const=True, required=False, help="Zeigt eine Visualisierung während die Rakete landet. (Sehr unperformant!)")
 parser.add_argument('--debug', action='store_const', const=True, required=False)
 args = parser.parse_args()
 
