@@ -116,6 +116,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.value: 
-        show_single_value(args.value, args.type)
+        show_single_value(args.value, args.variant)
     else:
-        show_animation(args.type)
+        show_animation(args.variant)

@@ -10,7 +10,7 @@ parser.add_argument('--live-plot', action='store_const', const=True, required=Fa
 parser.add_argument('--debug', action='store_const', const=True, required=False)
 args = parser.parse_args()
 
-input_sets, output_sets = library.load_sets(args.type)
+input_sets, output_sets = library.load_sets(args.variant)
 
 agg = fuzzy.Aggregator(input_sets, output_sets, 100)
 defuzzy = fuzzy.Defuzzy()
