@@ -1,7 +1,7 @@
 import argparse
 
 import fuzzy, library
-from landing_game import game_tick, game_state, set_lever, uhr
+from landing_game import game_tick, init, game_state, set_lever, uhr
 from plotting import Plotting
 
 parser = argparse.ArgumentParser()
@@ -18,6 +18,9 @@ defuzzy = fuzzy.Defuzzy()
 plotting = None
 if args.live_plot:
     plotting = Plotting(input_sets, output_sets, agg, defuzzy)
+
+# Spiel initialisieren
+init()
 # Hauptschleife
 while True:
     uhr.tick(30)

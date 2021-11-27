@@ -16,33 +16,48 @@
 #
 ########################################################################################
 
-from sys import float_info
 import pygame
-pygame.init()
-screen = pygame.display.set_mode([400,600])
-screen.fill([0, 0, 0])
+screen = None
 raumschiff = pygame.image.load('raumschiff.png')
 mond = pygame.image.load('mondoberflaeche.png')
-boden  = 540   # Landeplatz ist auf y = 540
-start = 90
 uhr = pygame.time.Clock()
-raumschiff_masse = 5000.0
-treibstoff = 5000.0
-geschwindigkeit = -100.0
+meinGashebel = None
+boden = 540   # Landeplatz ist auf y = 540
+start = 90
 gravitaet = 10
+raumschiff_masse = 5000.0
+# Diese Globals werden verändert, wenn das Spiel läuft
+geschwindigkeit = -100.0
 schub = 0
 delta_v = 0
 y_pos = 90
 fps = 30
+meinGashebel_ypos = 500
 
-# GameState-Objekt wird benötigt, damit
-# die Höhe im Hauptmodul importiert werden
-# kann und aktualisiert wird
 class GameState:
     def __init__(self):
         self.hoehe = 2000
+        self.fuel = 5000.0
+        self.velocity = -100.0
+        self.game_ended = False
+        self.success = False
 
 game_state = GameState()
+
+def reset_globals():
+    global geschwindigkeit, schub, delta_v, y_pos, fps, meinGashebel_ypos, game_state
+    geschwindigkeit = -100.0
+    schub = 0
+    delta_v = 0
+    y_pos = 90
+    fps = 30
+    meinGashebel_ypos = 500
+    game_state.hoehe = 2000
+    game_state.fuel = 5000.0
+    game_state.velocity = -100.0
+    game_state.game_ended = False
+    game_state.success = False
+
 
 # der Gashebel
 class GashebelKlasse(pygame.sprite.Sprite):
@@ -56,14 +71,15 @@ class GashebelKlasse(pygame.sprite.Sprite):
 
 # berechnet Position, Bewegung, Beschleunigung, Treibstoff
 def berechne_geschwindigkeit():
-    global schub, treibstoff, geschwindigkeit, delta_v, y_pos
+    global schub, geschwindigkeit, delta_v, y_pos
     delta_t = 1/fps
-    schub = (500 - meinGashebel.rect.centery) * 5.0  # Position des Gashebels in Schub umwandeln                                                  
-    treibstoff -= schub /(10 * fps)              # Treibstoff verbrauchen
-    if treibstoff < 0:  treibstoff = 0.0
-    if treibstoff < 0.1:  schub = 0.0
-    delta_v = delta_t * (-gravitaet + 200 * schub / (raumschiff_masse + treibstoff))
+    schub = (500 - meinGashebel_ypos) * 5.0  # Position des Gashebels in Schub umwandeln                                                  
+    game_state.fuel -= schub /(10 * fps)              # Treibstoff verbrauchen
+    if game_state.fuel < 0:  game_state.fuel = 0.0
+    if game_state.fuel < 0.1:  schub = 0.0
+    delta_v = delta_t * (-gravitaet + 200 * schub / (raumschiff_masse + game_state.fuel))
     geschwindigkeit = geschwindigkeit + delta_v
+    game_state.velocity = geschwindigkeit
     delta_h = geschwindigkeit * delta_t
     game_state.hoehe = game_state.hoehe + delta_h
     y_pos = boden - (game_state.hoehe * (boden - start) / 2000) - 90
@@ -74,7 +90,7 @@ def gib_statistik_aus():
     h_str = "Höhe:   %.1f" % game_state.hoehe
     t_str = "Schub:   %i" % schub
     a_str = "Beschleunigung: %.1f" % (delta_v * fps)
-    f_str = "Treibstoff:  %i" % treibstoff  
+    f_str = "Treibstoff:  %i" % game_state.fuel  
     v_font = pygame.font.Font(None, 26)
     v_surf = v_font.render(v_str, 1, (255, 255, 255))
     screen.blit(v_surf, [10, 50])
@@ -102,72 +118,88 @@ def zeige_flammen():
                                  (startx + 8, starty)], 0)
 
 # Endstand ausgeben wenn das Spiel vorbei ist
-def gib_endstand_aus():
+def gib_endstand_aus(draw: bool):
     final1 = "Spiel vorbei!"
     final2 = "Geschwindigkeit war %.1f m/s" % geschwindigkeit
-    if treibstoff == 0:
+    if game_state.fuel == 0:
         final3 = "Tank leer!"
         final4 = "Ohne Treibstoff geht nichts mehr."
+        game_state.success = False
     elif geschwindigkeit > -5:
         final3 = "Gute Landung!"
         final4 = "Die NASA braucht noch Astronauten!"
+        game_state.success = True
     elif geschwindigkeit > -15:
         final3 = "Aua!  Etwas rau, aber du hast überlebt."
         final4 = "Nächstes Mal machst du es besser."
+        game_state.success = True
     else:
         final3 = "Eijei! Das 30-Milliarden-Euro-Schiff ist kaputt!"
         final4 = "Wie kommst du jetzt nach Hause?"
-    pygame.draw.rect(screen, [0, 0, 0], [5, 5, 350, 280],0)  
-    f1_font = pygame.font.Font(None, 60)
-    f1_surf = f1_font.render(final1, 1, (255, 255, 255))
-    screen.blit(f1_surf, [20, 50])   
-    f2_font = pygame.font.Font(None, 30)
-    f2_surf = f2_font.render(final2, 1, (255, 255, 255))
-    screen.blit(f2_surf, [20, 110]) 
-    f3_font = pygame.font.Font(None, 24)
-    f3_surf = f3_font.render(final3, 1, (255, 255, 255))
-    screen.blit(f3_surf, [20, 150]) 
-    f4_font = pygame.font.Font(None, 24)
-    f4_surf = f4_font.render(final4, 1, (255, 255, 255))
-    screen.blit(f4_surf, [20, 180]) 
-    pygame.display.flip()
-
-meinGashebel = GashebelKlasse([15, 500])
+        game_state.success = False
+    game_state.game_ended = True
+    if draw:
+        pygame.draw.rect(screen, [0, 0, 0], [5, 5, 350, 280],0)  
+        f1_font = pygame.font.Font(None, 60)
+        f1_surf = f1_font.render(final1, 1, (255, 255, 255))
+        screen.blit(f1_surf, [20, 50])   
+        f2_font = pygame.font.Font(None, 30)
+        f2_surf = f2_font.render(final2, 1, (255, 255, 255))
+        screen.blit(f2_surf, [20, 110]) 
+        f3_font = pygame.font.Font(None, 24)
+        f3_surf = f3_font.render(final3, 1, (255, 255, 255))
+        screen.blit(f3_surf, [20, 150]) 
+        f4_font = pygame.font.Font(None, 24)
+        f4_surf = f4_font.render(final4, 1, (255, 255, 255))
+        screen.blit(f4_surf, [20, 180]) 
+        pygame.display.flip()
 
 # Setzt den Gashebel in die prozentuale Position
 def set_lever(gas_percent: float) -> None:
-    meinGashebel.rect.centery = 500 - 200 * gas_percent
-    if meinGashebel.rect.centery < 300:
-        meinGashebel.rect.centery = 300
-    if meinGashebel.rect.centery > 500:
-        meinGashebel.rect.centery = 500
+    global meinGashebel_ypos
+    meinGashebel_ypos = 500 - 200 * gas_percent
+    if meinGashebel:
+        meinGashebel.rect.centery = meinGashebel_ypos
+        if meinGashebel.rect.centery < 300:
+            meinGashebel.rect.centery = 300
+        if meinGashebel.rect.centery > 500:
+            meinGashebel.rect.centery = 500
 
-def game_tick():
+def init(draw=True):
+    global screen, meinGashebel
+    pygame.init()
+    screen = pygame.display.set_mode([400,600])
+    screen.fill([0, 0, 0])
+    meinGashebel = GashebelKlasse([15, 500])
+
+def game_tick(draw=True):
     global fps
     fps = uhr.get_fps()
     if fps < 1: fps = 30
-    if game_state.hoehe > 0.01 and treibstoff > 0:    
+    if game_state.hoehe > 0.01 and game_state.fuel > 0:
+        game_state.game_ended = False
         berechne_geschwindigkeit()
-        screen.fill([0, 0, 0])
-        gib_statistik_aus()
-        pygame.draw.rect(screen, [0, 0, 255], [80, 350, 24, 100], 2)
-        treibstoffhebel = 96 * treibstoff / 5000 
-        pygame.draw.rect(screen, [0,255,0], [84,448-treibstoffhebel,18, treibstoffhebel], 0) 
-        pygame.draw.rect(screen, [255, 0, 0], [25, 300, 10, 200],0)  # Gashebel-Slider
-        screen.blit(mond, [0, 500, 400, 100])                        # Mond
-        pygame.draw.rect(screen, [60, 60, 60], [220, 535, 70, 5],0)  # Landeplatz
-        screen.blit(meinGashebel.image, meinGashebel.rect)           # Schubgriff
-        zeige_flammen()                                              # Flammen
-        screen.blit(raumschiff, [230, y_pos, 50, 90])                # Raumschiff
-        anweisung1 = "Lande weich, ohne dass der Treibstoff ausgeht!"
-        anweisung2 = "Gute Landung: < 15m/s   Tolle Landung: < 5m/s"
-        anweisung1_font = pygame.font.Font(None, 24)
-        anweisung1_surf = anweisung1_font.render(anweisung1, 1, (255, 255, 255))
-        screen.blit(anweisung1_surf, [20, 550])
-        anweisung2_font = pygame.font.Font(None, 24)
-        anweisung2_surf = anweisung1_font.render(anweisung2, 1, (255, 255, 255))
-        screen.blit(anweisung2_surf, [20, 575])
-        pygame.display.flip()  
+        if draw:
+            screen.fill([0, 0, 0])
+            gib_statistik_aus()
+            pygame.draw.rect(screen, [0, 0, 255], [80, 350, 24, 100], 2)
+            treibstoffhebel = 96 * game_state.fuel / 5000 
+            pygame.draw.rect(screen, [0,255,0], [84,448-treibstoffhebel,18, treibstoffhebel], 0) 
+            pygame.draw.rect(screen, [255, 0, 0], [25, 300, 10, 200],0)  # Gashebel-Slider
+            screen.blit(mond, [0, 500, 400, 100])                        # Mond
+            pygame.draw.rect(screen, [60, 60, 60], [220, 535, 70, 5],0)  # Landeplatz
+            screen.blit(meinGashebel.image, meinGashebel.rect)           # Schubgriff
+            zeige_flammen()                                              # Flammen
+            screen.blit(raumschiff, [230, y_pos, 50, 90])                # Raumschiff
+            anweisung1 = "Lande weich, ohne dass der Treibstoff ausgeht!"
+            anweisung2 = "Gute Landung: < 15m/s   Tolle Landung: < 5m/s"
+            anweisung1_font = pygame.font.Font(None, 24)
+            anweisung1_surf = anweisung1_font.render(anweisung1, 1, (255, 255, 255))
+            screen.blit(anweisung1_surf, [20, 550])
+            anweisung2_font = pygame.font.Font(None, 24)
+            anweisung2_surf = anweisung1_font.render(anweisung2, 1, (255, 255, 255))
+            screen.blit(anweisung2_surf, [20, 575])
+            pygame.display.flip()  
     
     else:  # Spiel vorbei, gib den Endstand aus
-        gib_endstand_aus()
+        gib_endstand_aus(draw)
