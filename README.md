@@ -1,6 +1,8 @@
 # Mondlandung mithilfe von Fuzzy-Logik
 
-Dieses Projekt dient zur Demonstration eines Fuzzy-Systems basierend auf einer Übungsaufgabe der Vorlesung "Künstliche Intelligenz" an der Hochschule Bochum.
+Dieses Projekt dient zur Demonstration eines Fuzzy-Systems basierend auf einer Übungsaufgabe der Vorlesung "Künstliche Intelligenz" an der Hochschule Bochum. 
+
+Eine Übersicht über die Funktionweise des Fuzzy-Systems findet sich im Verzeichnis `docs`.
 
 ## Verwendung
 
