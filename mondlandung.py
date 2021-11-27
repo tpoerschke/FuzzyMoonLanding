@@ -29,7 +29,10 @@ while True:
     
     # Aggregieren & Hebel einstellen
     (x, y), _ = agg.aggregate(lg.game_state.hoehe)
-    gas_percent = 1 - defuzzy.centroid(x, y) / 100
+    try:
+        gas_percent = 1 - defuzzy.centroid(x, y) / 100
+    except ZeroDivisionError: 
+        gas_percent = 1
     lg.set_lever(gas_percent)
 
     if plotting:

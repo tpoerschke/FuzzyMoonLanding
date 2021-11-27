@@ -79,12 +79,13 @@ def main():
     print(f"Anzahl an Prozessen: {N_PROCESSES}")
     toolbox.register("map", pool.map)
 
-    pop = toolbox.population(n=100)
+    pop = toolbox.population(n=50)
     # Population evaluieren
     print(f"-- Generation Genesis --")
     fitnesses = list(toolbox.map(toolbox.evaluate, pop))
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
+    print("evaluated...")
 
     # CXPB:  Wahrscheinlichkeit, dass sich zwei Individuen paaren
     # MUTPB: Wahrscheinlichkeit, dass ein Individuum mutiert
@@ -101,7 +102,7 @@ def main():
     # erforderlich ist. Auch gamestate.success könnte
     # Anwendung finden, dann kann jedoch nicht die
     # Geschwindigkeit kontrolliert werden. 
-    while min(fits) > 15 and gen < 1000:
+    while min(fits) > 10 and gen < 100:
         gen += 1
         print(f"-- Generation {gen} --")
         # Nächste Generation auswählen

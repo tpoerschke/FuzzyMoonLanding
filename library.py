@@ -1,9 +1,10 @@
 import fuzzy
 
 SETS3 = "3 sets"
+SETS3_EA = "3 sets ea"
 SETS5_STANDARD = "5 sets"
 SETS5_SMOOTH = "5 sets smooth"
-ALL_VARIANTS = (SETS3, SETS5_STANDARD, SETS5_SMOOTH)
+ALL_VARIANTS = (SETS3, SETS3_EA, SETS5_STANDARD, SETS5_SMOOTH)
 
 # Standard (3 Sets)
 def _sets31():
@@ -16,6 +17,18 @@ def _sets31():
     a1 = fuzzy.M1(12, 65) # Viel Bremskraft
     a2 = fuzzy.M2(30, 90) # Mittlere Bremskraft
     a3 = fuzzy.M3(60, 70) # Wenig Bremskraft
+    output_sets = (a1, a2, a3)
+    return input_sets, output_sets
+
+# EA
+def _sets32():
+    m1 = fuzzy.M1(1964, 1986) 
+    m2 = fuzzy.M2(941, 1771)
+    m3 = fuzzy.M3(1397, 1975)
+    input_sets = (m1, m2, m3)
+    a1 = fuzzy.M1(74, 87)
+    a2 = fuzzy.M2(60, 79)
+    a3 = fuzzy.M3(25, 71)
     output_sets = (a1, a2, a3)
     return input_sets, output_sets
 
@@ -55,6 +68,7 @@ def _sets52():
 def load_sets(sets_type):
     return {
         SETS3: _sets31(),
+        SETS3_EA: _sets32(),
         SETS5_STANDARD: _sets51(),
         SETS5_SMOOTH: _sets52()
     }.get(sets_type, SETS3)
