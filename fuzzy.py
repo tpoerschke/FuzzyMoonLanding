@@ -6,7 +6,7 @@ class M1:
         self.x2 = x2
 
     def __call__(self, input_val: int) -> float:
-        if input_val < self.x1:
+        if input_val <= self.x1:
             return 1
         if input_val > self.x2:
             return 0
@@ -36,7 +36,7 @@ class M3:
     def __call__(self, input_val: int) -> float:
         if input_val < self.x1:
             return 0
-        if input_val > self.x2:
+        if input_val >= self.x2:
             return 1
         return (1 / (self.x2 - self.x1)) * (input_val - self.x1)
 
