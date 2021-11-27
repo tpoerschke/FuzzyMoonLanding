@@ -1,7 +1,7 @@
 import argparse
 
 import fuzzy, library
-from landing_game import game_tick, init, game_state, set_lever, uhr
+from landing_game import LandingGame
 from plotting import Plotting
 
 parser = argparse.ArgumentParser()
@@ -20,18 +20,19 @@ if args.live_plot:
     plotting = Plotting(input_sets, output_sets, agg, defuzzy)
 
 # Spiel initialisieren
-init()
+lg = LandingGame()
+lg.init()
 # Hauptschleife
 while True:
-    uhr.tick(30)
-    game_tick()
+    lg.uhr.tick(30)
+    lg.game_tick()
     
     # Aggregieren & Hebel einstellen
-    (x, y), _ = agg.aggregate(game_state.hoehe)
+    (x, y), _ = agg.aggregate(lg.game_state.hoehe)
     gas_percent = 1 - defuzzy.centroid(x, y) / 100
-    set_lever(gas_percent)
+    lg.set_lever(gas_percent)
 
     if plotting:
-        plotting.update(game_state.hoehe)
+        plotting.update(lg.game_state.hoehe)
     if args.debug:
         print(f"Gas: {gas_percent*100:.2f}% -> {500 - 200 * gas_percent:.2f}")
