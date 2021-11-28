@@ -1,4 +1,4 @@
-import os, random, csv, time, multiprocessing
+import os, random, csv, time, multiprocessing, argparse
 from deap import creator, base, tools
 
 import fuzzy
@@ -73,19 +73,21 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutUniformInt, low=0, up=[2000]*6 + [100]*6, indpb=0.05) # TODO: gewährleisten, dass x1 < x2 gilt
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-def main():
-    N_PROCESSES = 10
-    pool = multiprocessing.Pool(N_PROCESSES,)
+def main(args):
+    N_PROCESSES = 20
+    pool = multiprocessing.Pool(N_PROCESSES)
     print(f"Anzahl an Prozessen: {N_PROCESSES}")
     toolbox.register("map", pool.map)
 
-    pop = toolbox.population(n=50)
+    pop = toolbox.population(n=args.pop)
     # Population evaluieren
     print(f"-- Generation Genesis --")
+    t0 = time.perf_counter()
     fitnesses = list(toolbox.map(toolbox.evaluate, pop))
     for ind, fit in zip(pop, fitnesses):
         ind.fitness.values = fit
-    print("evaluated...")
+    t = int(time.perf_counter() - t0)
+    print(f"evaluated in {t} secs...")
 
     # CXPB:  Wahrscheinlichkeit, dass sich zwei Individuen paaren
     # MUTPB: Wahrscheinlichkeit, dass ein Individuum mutiert
@@ -95,6 +97,7 @@ def main():
     fits = [ind.fitness.values[0] for ind in pop]
 
     gen = 0
+    pop_hist, mean_hist, max_hist, min_hist, time_hist = [], [], [], [], []
     # Lasset die Evolution beginnen
     # Ab 15m/s gilt eine Landung als erfolgreich, 
     # daher wird dann abgebrochen. Kann verringert
@@ -102,7 +105,8 @@ def main():
     # erforderlich ist. Auch gamestate.success könnte
     # Anwendung finden, dann kann jedoch nicht die
     # Geschwindigkeit kontrolliert werden. 
-    while min(fits) > 10 and gen < 100:
+    while min(fits) > args.target_fitness and gen < args.max_gen:
+        t0 = time.perf_counter()
         gen += 1
         print(f"-- Generation {gen} --")
         # Nächste Generation auswählen
@@ -132,19 +136,37 @@ def main():
         # Statistiken
         length = len(pop)
         mean = sum(fits) / length
-        sum2 = sum(x*x for x in fits)
-        std = abs(sum2 / length - mean**2)**0.5
-        print("  Num %s" % length)
-        print("  Min %s" % min(fits))
-        print("  Max %s" % max(fits))
+        min_ = min(fits)
+        max_ = max(fits)
+        t = int(time.perf_counter() - t0)
+        print("  Pop %s" % length)
+        print("  Min %s" % min_)
+        print("  Max %s" % max_)
         print("  Avg %s" % mean)
-        print("  Std %s" % std)
+        print("  T   %s" % t)
+        pop_hist.append(length)
+        mean_hist.append(mean)
+        min_hist.append(min_)
+        max_hist.append(max_)
+        time_hist.append(t)
 
     # Individuuen der letzten Generation speichern
-    with open(f'individuals_{time.time():.0f}.csv', 'w') as csvfile:
+    timestamp = time.time()
+    with open(f'individuals_{timestamp:.0f}.csv', 'w') as csvfile:
         writer = csv.writer(csvfile)
         for ind, fit in zip(pop, fits):
             writer.writerow([fit] + list(ind))
+    # Informationen zum Durchlauf speichern
+    with open(f'stats_{timestamp:.0f}.csv', 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["pop", "mean", "max", "min", "t"])
+        for pop, mean, max_, min_, t in zip(pop_hist, mean_hist, max_hist, min_hist, time_hist):
+            writer.writerow([pop, mean, max_, min_, t])
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--target-fitness', type=int, required=False, default=10, help="Fitness, die erreicht werden soll.")
+    parser.add_argument('--pop', type=int, required=False, default=50, help="Größe der Population.")
+    parser.add_argument('--max-gen', type=int, required=False, default=100, help="Maximale Anzahl an Generationen.")
+    args = parser.parse_args()
+    main(args)
